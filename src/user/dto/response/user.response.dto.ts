@@ -1,11 +1,13 @@
 import { User } from '../../entities/user.entity';
 import _ from 'lodash';
+import { Role } from '../../../auth/authorization/constants';
 
 const properties = [
   'id',
   'firstName',
   'lastName',
   'email',
+  'role',
   'createdAt',
   'updatedAt',
 ];
@@ -18,6 +20,8 @@ export class UserResponseDto {
   lastName?: string;
 
   email!: string;
+
+  role!: Role;
 
   createdAt!: Date;
 

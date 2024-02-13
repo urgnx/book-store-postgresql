@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import * as bcrypt from 'bcrypt';
-import { UpdateUserInputDto, UserResponseDto } from './dto';
-import { RegisterUserInputDto } from '../auth/dto';
+import { CreateUserInputDto, UpdateUserInputDto, UserResponseDto } from './dto';
+import { AuthenticationErrorsEnum } from '../auth/authentication/constants';
+import * as argon2 from '@node-rs/argon2';
 
 interface FindOneArgs {
   id?: number;
@@ -18,19 +22,18 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(
-    registerUserDto: RegisterUserInputDto,
-  ): Promise<UserResponseDto> {
-    const { firstName, lastName, email, password } = registerUserDto;
+  async create(createUserInput: CreateUserInputDto) {
+    const { firstName, lastName, email, password } = createUserInput;
 
-    const existingUser = await this.usersRepository.findOneBy({ email });
+    const emailExists = await this.usersRepository.findOneBy({ email });
 
-    if (existingUser) {
-      throw new UnauthorizedException('Email is already taken');
+    if (emailExists) {
+      throw new ConflictException(
+        AuthenticationErrorsEnum.EMAIL_ALREADY_EXISTS,
+      );
     }
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await argon2.hash(createUserInput.password);
 
     const user = new User();
     user.firstName = firstName;
@@ -40,19 +43,23 @@ export class UserService {
 
     await this.usersRepository.save(user);
 
-    return new UserResponseDto(user);
+    return user;
   }
 
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll() /*: Promise<UserResponseDto[]> */ {
     const users = await this.usersRepository.find();
 
-    return users.map((user) => {
-      return new UserResponseDto(user);
-    });
+    return users.map((user) => new UserResponseDto(user));
   }
 
-  async findOne(args: FindOneArgs): Promise<User | null> {
-    return this.usersRepository.findOneBy({ ...args });
+  async findOne(args: FindOneArgs, throwException: boolean = false) {
+    const user = await this.usersRepository.findOneBy({ ...args });
+
+    if (!user && throwException) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   async update(

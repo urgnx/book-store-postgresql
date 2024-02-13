@@ -1,26 +1,8 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsEnum } from 'class-validator';
+import { RegisterUserInputDto } from '../../../auth/authentication/dto';
+import { Role } from '../../../auth/authorization/constants';
 
-export class CreateUserInputDto {
-  @IsNotEmpty()
-  @IsString()
-  firstName!: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(8)
-  password!: string;
+export class CreateUserInputDto extends RegisterUserInputDto {
+  @IsEnum(Role)
+  role!: Role;
 }
