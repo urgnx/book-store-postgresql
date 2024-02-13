@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -20,7 +19,7 @@ export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Auth()
-  @Roles(Role.STORE_MANAGER,Role.ADMIN)
+  @Roles(Role.STORE_MANAGER, Role.ADMIN)
   @Post()
   create(@Body() createBookInput: CreateBookInputDto) {
     return this.bookService.create(createBookInput);
@@ -45,12 +44,5 @@ export class BookController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBookInput: UpdateBookInputDto) {
     return this.bookService.update(+id, updateBookInput);
-  }
-
-  @Auth()
-  @Roles(Role.STORE_MANAGER, Role.ADMIN)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookService.remove(+id);
   }
 }

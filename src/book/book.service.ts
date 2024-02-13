@@ -66,11 +66,17 @@ export class BookService {
     return book ? new BookResponseDto(book) : null;
   }
 
-  update(id: number, updateBookInputDto: UpdateBookInputDto) {
-    return `This action updates a #${id} book`;
-  }
+  async update(id: number, updateBookInputDto: UpdateBookInputDto) {
+    const book = await this.bookRepository.findOneBy({ id });
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
+
+    Object.assign(book, updateBookInputDto);
+
+    const updatedBook = await this.bookRepository.save(book);
+
+    return new BookResponseDto(updatedBook);
   }
 }

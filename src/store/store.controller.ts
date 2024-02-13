@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreInputDto, UpdateStoreInputDto } from './dto';
 import { Auth } from '../auth/decorators';
@@ -46,12 +38,5 @@ export class StoreController {
     @Body() updateStoreInput: UpdateStoreInputDto,
   ) {
     return this.storeService.update(+id, updateStoreInput);
-  }
-
-  @Auth()
-  @Roles(Role.ADMIN)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.storeService.remove(+id);
   }
 }

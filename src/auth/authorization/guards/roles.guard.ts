@@ -23,13 +23,13 @@ export class RolesGuard implements CanActivate {
     }
 
     const request: Request = context.switchToHttp().getRequest();
-    const user = (request as any)?.user; // Assuming 'user' is stored in the request object
+
+    const user = (request as any)?.auth.user;
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    // Assuming 'role' is a property on the User entity
-    return requiredRoles.some((role) => user.role === role); // Adjust this according to your User and Role entities in TypeORM
+    return requiredRoles.some((role) => user.role === role);
   }
 }

@@ -62,15 +62,29 @@ export class UserService {
     return user;
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserInputDto,
-  ) /*: Promise<User>*/ {
-    //TODO: Add promise
-    /* await this.usersRepository.update(id);*/
-  }
+  async update(id: number, updateUserDto: UpdateUserInputDto) {
+    if (updateUserDto.email) {
+      const emailExists = await this.usersRepository.findOneBy({
+        email: updateUserDto.email,
+      });
 
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+      if (emailExists) {
+        throw new ConflictException(
+          AuthenticationErrorsEnum.EMAIL_ALREADY_EXISTS,
+        );
+      }
+    }
+
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    Object.assign(user, updateUserDto);
+
+    const updatedUser = await this.usersRepository.save(user);
+
+    return new UserResponseDto(updatedUser);
   }
 }

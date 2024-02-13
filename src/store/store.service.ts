@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import {
   CreateStoreInputDto,
   StoreResponseDto,
@@ -7,6 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Store } from './entities/store.entity';
+import {UpdateUserInputDto, UserResponseDto} from "../user/dto";
+import {AuthenticationErrorsEnum} from "../auth/authentication/constants";
 
 interface FindOneArgs {
   id?: number;
@@ -47,11 +49,17 @@ export class StoreService {
     return store;
   }
 
-  update(id: number, updateStoreInputDto: UpdateStoreInputDto) {
-    return `This action updates a #${id} store`;
-  }
+  async update(id: number, updateStoreInput: UpdateStoreInputDto) {
+    const store = await this.storeRepository.findOneBy({ id });
 
-  remove(id: number) {
-    return `This action removes a #${id} store`;
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+
+    Object.assign(store, updateStoreInput);
+
+    const updatedStore = await this.storeRepository.save(store);
+
+    return new StoreResponseDto(updatedStore);
   }
 }

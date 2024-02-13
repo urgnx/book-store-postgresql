@@ -18,7 +18,7 @@ export function getCurrentUserFromContext(
   | ICurrentUserAuth['user']
   | ICurrentUserAuth['accessToken'] {
   const request = ctx.switchToHttp().getRequest();
-  const auth: ICurrentUserAuth = request.user;
+  const auth: ICurrentUserAuth = request.auth.user;
 
   if (!auth) {
     throw new Error("Auth property isn't set on request object");
